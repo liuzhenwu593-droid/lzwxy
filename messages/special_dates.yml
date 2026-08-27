@@ -1,0 +1,53 @@
+# Special dates reference file
+# ============================================================
+# This file documents how to configure PERSONAL special dates
+# (birthdays, anniversaries, etc.) for each friend.
+#
+# Public holidays (New Year, Victory Day, Women's Day, etc.)
+# are NOT auto-greeted. Only personal dates you configure in
+# per-target 'special_dates' trigger a custom greeting.
+# All other days use the normal morning/evening message pools.
+# ============================================================
+#
+# Format in config.yml (per target):
+#   special_dates:
+#     "MM-DD":
+#       morning: "Morning greeting for this date"
+#       evening: "Evening greeting for this date"
+#       message: "Generic greeting (used if morning/evening not set)"
+#
+# {name} placeholder is replaced with the target's name.
+
+examples:
+  birthday:
+    description: "Birthday greeting for a friend"
+    config: |
+      special_dates:
+        "03-15":
+          morning: "С днём рождения, {name}! Желаю счастья, здоровья и всего наилучшего!"
+          evening: "С днём рождения, {name}! Надеюсь, твой день прошёл замечательно."
+
+  anniversary:
+    description: "Anniversary or other personal date"
+    config: |
+      special_dates:
+        "06-10":
+          message: "С годовщиной, {name}! Желаю продолжать в том же духе!"
+
+  new_year_custom:
+    description: "If you WANT a New Year greeting on Jan 1, add it manually"
+    config: |
+      special_dates:
+        "01-01":
+          morning: "С Новым годом, {name}! Пусть этот год будет лучше предыдущего!"
+          evening: "Спокойной ночи! Первый день нового года прошёл, {name}. Добрых снов!"
+
+  multiple:
+    description: "Multiple personal dates for one friend"
+    config: |
+      special_dates:
+        "03-15":
+          morning: "С днём рождения, {name}!"
+          evening: "С днём рождения, {name}! Добрых снов!"
+        "08-27":
+          message: "С праздником, {name}!"

@@ -1,0 +1,40 @@
+name: Daily Greeting
+
+# Single workflow for both morning and evening greetings.
+# Manual trigger only (no schedule).
+#
+# The script auto-detects the period based on current Moscow time:
+#   00:00~12:59 MSK -> morning greetings
+#   13:00~23:59 MSK -> evening greetings
+# So you can run it manually at any time in these windows.
+#
+# How to run: Actions tab -> "Daily Greeting" -> "Run workflow".
+
+on:
+  workflow_dispatch:           # Manual trigger only
+
+jobs:
+  send-greetings:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15  # 1~5 min pre-send wait + 300s send timeout + deps
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Send greetings (auto-detect morning/evening)
+        env:
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_SESSION_STRING: ${{ secrets.TG_SESSION_STRING }}
+        run: |
+          python main.py --config config/config.yml
