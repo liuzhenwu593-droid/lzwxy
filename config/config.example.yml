@@ -1,0 +1,171 @@
+# ============================================================
+# TG Daily Greeter - Configuration Example
+# ============================================================
+# Copy this file to config.yml and fill in your details.
+# Sensitive credentials (api_id, api_hash, session_string)
+# are recommended to be set via environment variables / GitHub
+# Secrets instead of writing them here.
+# ============================================================
+
+# Telegram API credentials (get from https://my.telegram.org/apps)
+# Leave empty to use environment variables: TG_API_ID, TG_API_HASH, TG_SESSION_STRING
+api_id: ""
+api_hash: ""
+session_string: ""
+
+# Optional proxy (e.g. "socks5://127.0.0.1:1080" or "http://127.0.0.1:8080")
+# Leave empty for direct connection. GitHub Actions usually doesn't need this.
+proxy: ""
+
+# Default timezone for all targets (can be overridden per-target)
+# Moscow = Europe/Moscow (UTC+3, no DST)
+timezone: "Europe/Moscow"
+
+# Default random jitter in minutes (± range) for each send
+# Helps avoid mechanical sending patterns
+default_jitter_minutes: 5
+
+# Dry run mode: if true, messages are printed but not sent
+dry_run: false
+
+# ============================================================
+# Anti-detection / Human behavior settings
+# ============================================================
+# These settings make the script behave like a real human,
+# reducing the chance of Telegram flagging the account.
+
+# Probability (0.0 to 1.0) of skipping the ENTIRE day.
+# IMPORTANT: this is the probability of NOT sending.
+#   0.0 = never skip (always send)   <-- set this for testing
+#   0.2 = 20% of days are skipped, 80% of days messages ARE sent (default)
+#   0.8 = 80% of days are skipped, only 20% of days messages are sent
+#   1.0 = always skip (never sends)
+# If you keep getting "今日随机跳过", check this value in your config.yml.
+skip_probability: 0.2
+
+# Pre-send random delay (seconds).
+# After the script starts, it waits a random short time before connecting
+# and sending. Simulates a human delay. Same for both morning/evening.
+#
+# Manual run period auto-detect (Moscow time):
+#   00:00~12:59 -> morning greetings
+#   13:00~23:59 -> evening greetings
+morning_delay_min: 60
+morning_delay_max: 300    # 1~5 minutes
+#
+evening_delay_min: 60
+evening_delay_max: 300    # 1~5 minutes
+
+# Delay between sending to different friends (seconds).
+# After sending to one friend, wait a random time before sending
+# to the next. Simulates a human typing one message at a time.
+# Default: 2-5 seconds
+inter_target_delay_min: 2
+inter_target_delay_max: 5
+
+# Typing indicator duration (seconds).
+# Before sending each message, the script shows "typing..." for
+# a random duration, then sends. Simulates a human typing.
+# Default: 1.5-4.0 seconds
+typing_min: 1.5
+typing_max: 4.0
+
+# ============================================================
+# Targets: people to send greetings to
+# ============================================================
+# Each target needs:
+#   - name: display name (used in {name} placeholder)
+#   - chat_id OR username: Telegram chat identifier
+#   - timezone: (optional) overrides global timezone
+#   - morning: (optional) morning message source (message_file/message_pool)
+#   - evening: (optional) evening message source (message_file/message_pool)
+#   - jitter_minutes: (optional) per-target jitter
+#   - selection_mode: (optional) 'random' (default) or 'sequential'
+#   - special_dates: (optional) personal special dates (birthdays, etc.)
+# ============================================================
+# NOTE: Public holidays (New Year, Victory Day, etc.) are NOT auto-greeted.
+# Only personal dates you configure in 'special_dates' will trigger a
+# custom greeting. All other days use the normal morning/evening pools.
+# ============================================================
+
+targets:
+  # --- Friend 1 ---
+  # Morning and evening use DIFFERENT message pools via sub-configs.
+  # The workflow's --period flag determines which one is loaded.
+  - name: "Алексей"
+    username: "@alexey_example"
+    timezone: "Europe/Moscow"
+    jitter_minutes: 5
+    selection_mode: "random"
+    morning:
+      message_file: "messages/morning_ru.yml"
+    evening:
+      message_file: "messages/evening_ru.yml"
+    # Personal special dates (only these are detected; no public holidays)
+    special_dates:
+      "03-15":
+        morning: "С днём рождения, {name}! Желаю счастья, здоровья и всего наилучшего! Пусть этот день будет незабываемым!"
+        evening: "С днём рождения, {name}! Надеюсь, твой день рождения прошёл замечательно. Желаю тебе всего самого лучшего!"
+
+  # --- Friend 2 (inline message pools) ---
+  # You can also use inline message_pool inside morning/evening sub-configs.
+  - name: "Мария"
+    chat_id: 987654321
+    timezone: "Europe/Moscow"
+    jitter_minutes: 3
+    morning:
+      message_pool:
+        - "Доброе утро, {name}! Желаю прекрасного дня!"
+        - "С утра, {name}! Пусть сегодня всё получится."
+        - "Доброе утро! Надеюсь, ты выспалась, {name}."
+    evening:
+      message_pool:
+        - "Спокойной ночи, {name}! Высыпайся как следует!"
+        - "Добрых снов, {name}! Завтра будет новый день."
+        - "Спокойной ночи! Надеюсь, твой день был хорошим, {name}."
+    special_dates: {}
+
+  # --- Friend 3 ---
+  - name: "Дмитрий"
+    username: "@dmitry_example"
+    timezone: "Europe/Moscow"
+    jitter_minutes: 5
+    morning:
+      message_file: "messages/morning_ru.yml"
+    evening:
+      message_file: "messages/evening_ru.yml"
+    special_dates:
+      "07-20":
+        message: "С днём рождения, {name}! Желаю огромного счастья и крепкого здоровья!"
+
+  # --- Friend 4 (Moldova) ---
+  # Same as any other friend: morning/evening pools + personal special dates.
+  # No holiday-specific logic.
+  - name: "Сергей"
+    username: "@serhey_moldova"
+    timezone: "Europe/Moscow"
+    jitter_minutes: 5
+    morning:
+      message_file: "messages/morning_ru.yml"
+    evening:
+      message_file: "messages/evening_ru.yml"
+    special_dates: {}
+
+# ============================================================
+# Morning vs Evening message pools:
+# ============================================================
+# Each target can have 'morning' and 'evening' sub-configs with
+# their own message_file or message_pool. The workflow passes
+# --period morning or --period evening, and the script loads the
+# corresponding sub-config.
+#
+# Example:
+#   morning:
+#     message_file: "messages/morning_ru.yml"
+#   evening:
+#     message_file: "messages/evening_ru.yml"
+#
+# If a target has no morning/evening sub-config, the top-level
+# message_file/message_pool is used for both periods (backward
+# compatible).
+# ============================================================

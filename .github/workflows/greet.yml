@@ -37,4 +37,4 @@ jobs:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_SESSION_STRING: ${{ secrets.TG_SESSION_STRING }}
         run: |
-          python main.py --config config/config.yml
+          python -u main.py --config config/config.yml

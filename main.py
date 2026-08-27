@@ -434,6 +434,15 @@ async def run(args: argparse.Namespace) -> int:
 
 def main() -> None:
     """CLI entry point."""
+    # Force line-buffered stdout so every printed line appears in the log
+    # in real time (critical during long random sleeps; otherwise Python
+    # buffers output and it only shows up after the sleep ends).
+    try:
+        sys.stdout.reconfigure(line_buffering=True)
+        sys.stderr.reconfigure(line_buffering=True)
+    except Exception:
+        pass
+
     args = parse_args()
     try:
         exit_code = asyncio.run(run(args))
